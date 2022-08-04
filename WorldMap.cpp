@@ -57,7 +57,7 @@ void WorldMap::_bind_methods() {
 	//ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "test"), "set_test", "get_test");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "oscillator_domain"), "set_oscillator_domain", "get_oscillator_domain");
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "map_domain"), "set_map_domain", "get_map_domain");
-	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "parameters"), "set_parameters", "get_parameters");
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "parameters"), "set_parameters", "get_parameters");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "time"), "set_time", "get_time");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "init_map_pos"), "set_init_map_pos", "get_init_map_pos");
 }
@@ -98,10 +98,8 @@ Dictionary WorldMap::get_val_dict(Variant map_or_world_pos)
 	}
 		
 	for (int i = 0; i < parameters.size(); i++) {
-		String key = parameters.get_key_at_index(i);
-		val_dict[key] = parameters[key].call("get_val", map_pos.x, map_pos.y, time);
+		val_dict[parameters[i].call("get_name")] = parameters[i].call("get_val", map_pos.x, map_pos.y, time);
 	}
-
 
 	return val_dict;
 }
@@ -116,7 +114,13 @@ float WorldMap::get_val(String parameter_name, Variant map_or_world_pos)
 	else {
 		map_pos = map_or_world_pos;
 	}
-	val = parameters[parameter_name].call("get_val", map_pos.x, map_pos.y, time);
+
+	for (int i = 0; i < parameters.size(); i++) {
+		if (parameters[i].call("get_name") == parameter_name){
+			val = parameters[i].call("get_val", map_pos.x, map_pos.y, time);
+			break;
+		}
+	}
 	return val;
 }
 
@@ -130,7 +134,13 @@ float WorldMap::get_val_unnmodified(String parameter_name, Variant map_or_world_
 	else {
 		map_pos = map_or_world_pos;
 	}
-	val = parameters[parameter_name].call("get_val_unmodified", map_pos.x, map_pos.y, time);
+
+	for (int i = 0; i < parameters.size(); i++) {
+		if (parameters[i].call("get_name") == parameter_name) {
+			val = parameters[i].call("get_val_unmodified", map_pos.x, map_pos.y, time);
+			break;
+		}
+	}
 	return val;
 }
 
@@ -151,15 +161,35 @@ void WorldMap::init_static_objects(Array p_static_object_list)
 
 Array WorldMap::get_parameter_names()
 {
-	return Array();
+	Array parameter_names;
+	for (int i = 0; i < parameters.size(); i++) {
+		parameter_names.push_back(parameters[i].call("get_name"));
+	}
+	return parameter_names;
 }
 
-float WorldMap::get_world_correction_factor()
+Vector3 WorldMap::get_world_correction_factor()
 {
-	return 0.0f;
+	Vector2 map_pos = init_map_pos;
+	Vector3 world_pos = Vector3();
+	world_pos.x = (map_pos.x) * map_domain->get_mw_conversion(); //#(map_pos.x - init_map_pos.x) * map_domain.mw_conversion
+	world_pos.y = 0; //#this is because I don't want to rely on their being a particular param
+	//#i can just solve it at the site it is needed
+	world_pos.z = (map_pos.y) * map_domain->get_mw_conversion(); //#(map_pos.y - init_map_pos.y) * map_domain.mw_conversion
+	return world_pos;
 }
 
 Ref<Resource> WorldMap::duplicate(bool p_subresources) const
 {
-	return Ref<Resource>();
+	Variant new_world_map = Resource::duplicate();
+	if (p_subresources == true) {
+		new_world_map.set_named("oscillator_domain", oscillator_domain->duplicate(true));
+		new_world_map.set_named("map_domain", map_domain->duplicate(true));
+		new_world_map.set_named("time", time);
+		new_world_map.set_named("parameters", parameters.duplicate(true);
+		new_world_map.set_named("init_map_pos", init_map_pos);
+		new_world_map.set_named("static_object_list", static_object_list.duplicate(true);
+	}
+
+	return (Ref<WorldMap>)new_world_map;
 }

@@ -27,7 +27,7 @@ protected:
 	Ref<OscillatorDomain> oscillator_domain; //Don't know if there is a better way to do this making a seperate class to do this seems annoying to me
 	Ref<MapDomain> map_domain;
 	float time;
-	Dictionary parameters;
+	Array parameters;
 	Vector2 init_map_pos;
 	Array static_object_list;
 	
@@ -40,8 +40,8 @@ public:
 	void set_map_domain(Ref<MapDomain> p_map_domain) { map_domain = p_map_domain; }
 	Ref<MapDomain> get_map_domain() const { return map_domain; }
 
-	void set_parameters(Dictionary p_parameters) { parameters = p_parameters; }
-	Dictionary get_parameters() const { return parameters; }
+	void set_parameters(Array p_parameters) { parameters = p_parameters; }
+	Array get_parameters() const { return parameters; }
 
 	void set_time(float p_time) { time = p_time; }
 	float get_time() const { return time; }
@@ -64,7 +64,7 @@ public:
 	void init_static_objects(Array static_object_list);
 	//-dynamic objects
 	Array get_parameter_names();//returns keys of parameters
-	float get_world_correction_factor();
+	Vector3 get_world_correction_factor();
 
 	Ref<Resource> duplicate(bool p_subresources) const override; //overriden function
 	
