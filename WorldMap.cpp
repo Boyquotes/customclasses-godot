@@ -1,6 +1,17 @@
 #include "WorldMap.h"
+#include <typeinfo>/*
+...
+cout << typeid(variable).name() << endl;*/
 
-WorldMap::WorldMap() {}
+WorldMap::WorldMap() {
+	if (typeid(oscillator_domain).name() != typeid(OscillatorDomain).name()) {
+		OS::get_singleton()->print("Does not have oscillator domain");
+	}
+	if (typeid(map_domain).name() != typeid(MapDomain).name()) {
+		OS::get_singleton()->print("Does not have map domain");
+	}
+
+}
 
 //float(*get_val_unnmodified)(Vector3) = &WorldMap::get_val_unnmodified; // selects int f(int)
 //Bind all your methods used in this class
@@ -29,14 +40,11 @@ void WorldMap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_world_pos", "map_pos"), &WorldMap::get_world_pos);
 	ClassDB::bind_method(D_METHOD("get_map_pos", "world_pos"), &WorldMap::get_map_pos);
 
-	ClassDB::bind_method(D_METHOD("get_val_dict", "map_pos"), static_cast<Dictionary (WorldMap::*)(Vector2) > (&WorldMap::get_val_dict));
-	ClassDB::bind_method(D_METHOD("get_val_dict", "world_pos"), static_cast<Dictionary(WorldMap::*)(Vector3)> (&WorldMap::get_val_dict));
+	ClassDB::bind_method(D_METHOD("get_val_dict", "world_or_map_pos"), &WorldMap::get_val_dict);
 
-	ClassDB::bind_method(D_METHOD("get_val", "map_pos"), static_cast<float (WorldMap::*)(Vector2)> (&WorldMap::get_val));
-	ClassDB::bind_method(D_METHOD("get_val", "world_pos"), static_cast<float (WorldMap::*)(Vector3)> (&WorldMap::get_val));
+	ClassDB::bind_method(D_METHOD("get_val", "world_or_map_pos"), (&WorldMap::get_val));
 
-	ClassDB::bind_method(D_METHOD("get_val_unnmodified", "map_pos"), static_cast<float (WorldMap::*)(Vector2)> (&WorldMap::get_val_unnmodified));
-	ClassDB::bind_method(D_METHOD("get_val_unnmodified", "world_pos"), static_cast<float (WorldMap::*)(Vector3)> (&WorldMap::get_val_unnmodified));
+	ClassDB::bind_method(D_METHOD("get_val_unnmodified", "world_or_map_pos"), (&WorldMap::get_val_unnmodified));
 
 	ClassDB::bind_method(D_METHOD("get_static_objects"), &WorldMap::get_static_objects);
 	ClassDB::bind_method(D_METHOD("init_static_objects", "static_object_list"), &WorldMap::init_static_objects);
@@ -58,54 +66,87 @@ void WorldMap::_bind_methods() {
 
 Vector3 WorldMap::get_world_pos(Vector2 map_pos)
 {
-	/*Vector3 world_pos = Vector3();
-	world_pos.x = (map_pos.x - init_map_pos.x) * map_domain->*/
-
-	return Vector3();
+	Vector3 world_pos = Vector3();
+	//world_pos.x = (map_pos.x) * map_domain.mw_conversion #
+	world_pos.x = (map_pos.x - init_map_pos.x) * map_domain->get_mw_conversion();
+	world_pos.y = 0; //this is because I don't want to rely on their being a particular param
+	world_pos.z = (map_pos.y - init_map_pos.y) * map_domain->get_mw_conversion();
+	//i can just solve it at the site it is needed
+	//world_pos.z = (map_pos.y) * map_domain.mw_conversion #
+	return world_pos;
 }
 
 Vector2 WorldMap::get_map_pos(Vector3 world_pos)
 {
-	return Vector2();
+	Vector2 map_pos = Vector2();
+	map_pos.x = (world_pos.x / map_domain->get_mw_conversion()) + init_map_pos.x; //+ init_map_pos.x
+	//map_pos.x = (world_pos.x / map_domain.mw_conversion)
+	map_pos.y = (world_pos.z / map_domain->get_mw_conversion()) + init_map_pos.y; // + init_map_pos.y
+	//map_pos.y = (world_pos.z / map_domain.mw_conversion)
+	return map_pos;
 }
 
-Dictionary WorldMap::get_val_dict(Vector2 map_pos)
+Dictionary WorldMap::get_val_dict(Variant map_or_world_pos)
 {
-	return Dictionary();
+	Dictionary val_dict = Dictionary();
+	Vector2 map_pos;
+	if (map_or_world_pos.get_type() == Variant::Type::VECTOR3) {
+		map_pos = get_map_pos(map_or_world_pos);
+	}
+	else {
+		map_pos = map_or_world_pos;
+	}
+		
+	for (int i = 0; i < parameters.size(); i++) {
+		String key = parameters.get_key_at_index(i);
+		val_dict[key] = parameters[key].call("get_val", map_pos.x, map_pos.y, time);
+	}
+
+
+	return val_dict;
 }
 
-Dictionary WorldMap::get_val_dict(Vector3 world_pos)
+float WorldMap::get_val(String parameter_name, Variant map_or_world_pos)
 {
-	return Dictionary();
+	float val = 0;
+	Vector2 map_pos;
+	if (map_or_world_pos.get_type() == Variant::Type::VECTOR3) {
+		map_pos = get_map_pos(map_or_world_pos);
+	}
+	else {
+		map_pos = map_or_world_pos;
+	}
+	val = parameters[parameter_name].call("get_val", map_pos.x, map_pos.y, time);
+	return val;
 }
 
-float WorldMap::get_val(Vector2 map_pos)
+float WorldMap::get_val_unnmodified(String parameter_name, Variant map_or_world_pos)
 {
-	return 0.0f;
-}
-
-float WorldMap::get_val(Vector3 world_pos)
-{
-	return 0.0f;
-}
-
-float WorldMap::get_val_unnmodified(Vector2 map_pos)
-{
-	return 0.0f;
-}
-
-float WorldMap::get_val_unnmodified(Vector3 world_pos)
-{
-	return 0.0f;
+	float val = 0;
+	Vector2 map_pos;
+	if (map_or_world_pos.get_type() == Variant::Type::VECTOR3) {
+		map_pos = get_map_pos(map_or_world_pos);
+	}
+	else {
+		map_pos = map_or_world_pos;
+	}
+	val = parameters[parameter_name].call("get_val_unmodified", map_pos.x, map_pos.y, time);
+	return val;
 }
 
 Array WorldMap::get_static_objects()
 {
-	return Array();
+	/*Array new_static_object_list;
+
+	for (int i = 0; i < static_objects.size(); i++) {
+		new_static_object_list.push_back()
+	}*/
+	return static_object_list; //(Ref<Array>)
 }
 
-void WorldMap::init_static_objects(Array static_object_list)
+void WorldMap::init_static_objects(Array p_static_object_list)
 {
+	static_object_list = p_static_object_list;
 }
 
 Array WorldMap::get_parameter_names()

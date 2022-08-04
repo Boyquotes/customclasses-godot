@@ -15,6 +15,9 @@ void Parameter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_val", "x", "y", "time"), &Parameter::get_val);
 	ClassDB::bind_method(D_METHOD("get_val_unmodified", "x", "y", "time"), &Parameter::get_val_unmodified);
 
+	ClassDB::bind_method(D_METHOD("set_name", "p_name"), &Parameter::set_name);
+	ClassDB::bind_method(D_METHOD("get_name"), &Parameter::get_name);
+
 	ClassDB::bind_method(D_METHOD("set_immutable_maps", "p_immutable_maps"), &Parameter::set_immutable_maps);
 	ClassDB::bind_method(D_METHOD("get_immutable_maps"), &Parameter::get_immutable_maps);
 

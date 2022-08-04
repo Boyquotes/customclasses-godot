@@ -24,18 +24,18 @@ protected:
 	static void _bind_methods();
 
 	
-
 	Ref<OscillatorDomain> oscillator_domain; //Don't know if there is a better way to do this making a seperate class to do this seems annoying to me
 	Ref<MapDomain> map_domain;
 	float time;
 	Dictionary parameters;
 	Vector2 init_map_pos;
+	Array static_object_list;
 	
 public:
 	WorldMap();
 
 	void set_oscillator_domain(Ref<OscillatorDomain> p_oscillator_domain) { oscillator_domain = p_oscillator_domain; }
-	Ref<OscillatorDomain> get_oscillator_domain() const { return oscillator_domain; }
+	Ref<OscillatorDomain> get_oscillator_domain() const { return Ref<OscillatorDomain>(oscillator_domain); }
 
 	void set_map_domain(Ref<MapDomain> p_map_domain) { map_domain = p_map_domain; }
 	Ref<MapDomain> get_map_domain() const { return map_domain; }
@@ -48,23 +48,15 @@ public:
 
 	void set_init_map_pos(Vector2 p_init_map_pos) { init_map_pos = p_init_map_pos; }
 	Vector2 get_init_map_pos() const { return init_map_pos; }
-
-
+	
 	Vector3 get_world_pos(Vector2 map_pos);
 	Vector2 get_map_pos(Vector3 world_pos);
-
 	
-	Dictionary get_val_dict(Vector2 map_pos);
-	Dictionary get_val_dict(Vector3 world_pos);
+	Dictionary get_val_dict(Variant map_or_world_pos);
 
-	//void test_func();
-	//void(WorldMap::* test_func_ptr)() = &test_func;
-	float get_val(Vector2 map_pos);	
-	float get_val(Vector3 world_pos);
-	//float(WorldMap::* get_val_ptr)(Vector2) = &get_val;
+	float get_val(String parameter_name, Variant map_or_world_pos);
 
-	float get_val_unnmodified(Vector2 map_pos);
-	float get_val_unnmodified(Vector3 world_pos);
+	float get_val_unnmodified(String parameter_name, Variant map_or_world_pos);
 
 	//OBJECTS----
 	//-static objects
