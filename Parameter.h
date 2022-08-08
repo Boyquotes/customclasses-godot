@@ -27,24 +27,25 @@ protected:
 public:
 	Parameter();
 
-	
+	void reset_mod();
 	void set_name(String p_name) { name = p_name;}
 	String get_name() const {return name;}
 
-	void set_oscillators(Array p_oscillators) { oscillators = p_oscillators; }
+	void set_oscillators(Array p_oscillators) { oscillators = p_oscillators; reset_mod(); }
 	Array get_oscillators() const { return oscillators; }
 
-	void set_immutable_maps(Array p_immutable_maps) {immutable_maps = p_immutable_maps;}
+	void set_immutable_maps(Array p_immutable_maps) { immutable_maps = p_immutable_maps; reset_mod(); }
 	Array get_immutable_maps() const {return immutable_maps;}
 
-	void set_mod(float p_mod) {mod = p_mod;}
+	void set_mod(float p_mod) {mod = p_mod;} //not for normal use
 	float get_mod() const {return mod;}
 
 	float get_val(float x, float y, float time) ;
 	float get_val_unmodified(float x, float y, float time);
 
 	Ref<Resource> duplicate(bool p_subresources) const override; //overriden function
-	void reset_mod();
+
+	void randomize_seeds();
 };
 
 #endif

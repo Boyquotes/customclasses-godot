@@ -14,7 +14,7 @@ class SimpleOscillator : public Resource {
 
 protected:
 	String amp_units; //must be plural
-	float amp_mult; //what the value is multiplied by, it represents the real world interpretation of the change between 0 and 1#ONLY USED WHEN vals = MODIFIED
+	float mod; //what the value is multiplied by, it represents the real world interpretation of the change between 0 and 1#ONLY USED WHEN vals = MODIFIED
 	float amp_shift;
 
 	String phase_units; //must be plural
@@ -29,8 +29,8 @@ public:
 	void set_amp_units(String p_amp_units) { amp_units = p_amp_units; }
 	String get_amp_units() const { return amp_units; }
 
-	void set_amp_mult(float p_amp_mult) { amp_mult = p_amp_mult; }
-	float get_amp_mult() const { return amp_mult; }
+	void set_mod(float p_mod) { mod = p_mod; }
+	float get_mod() const { return mod; }
 
 	void set_amp_shift(float p_amp_shift) { amp_shift = p_amp_shift; }
 	float get_amp_shift() const { return amp_shift; }

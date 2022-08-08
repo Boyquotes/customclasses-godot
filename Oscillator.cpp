@@ -29,17 +29,17 @@ float Oscillator::get_val(float time)
 
 	float total = 0;
 
-	total += amp_mult * sin((period * time) + phase_shift) + amp_shift;
+	total += mod * sin((period * time) + phase_shift) + amp_shift;
 
-	for (int i = 0; i < octaves; i++) {
-		total += (amp_mult * pow(persistence, i / (i - octaves))) * sin(((period * pow(lacunarity, i / (i - octaves))) * time) + (phase_shift * pow(lacunarity, i / (i - octaves)))) + amp_shift;
+	for (int i = 0; i < octaves; i++) { //maybe I should change this. Seems rather lengthy
+		total += (mod * pow(persistence, i / (i - octaves))) * sin(((period * pow(lacunarity, i / (i - octaves))) * time) + (phase_shift * pow(lacunarity, i / (i - octaves)))) + amp_shift;
 	}
 	return total;
 }
 
 float Oscillator::get_val_unmodified(float time) 
 {
-	return get_val(time) / amp_mult; //?
+	return get_val(time) / mod; //?
 }
 
 

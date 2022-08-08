@@ -14,8 +14,8 @@ void SimpleOscillator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_amp_units", "amp_units"), &SimpleOscillator::set_amp_units);
 	ClassDB::bind_method(D_METHOD("get_amp_units"), &SimpleOscillator::get_amp_units);
 
-	ClassDB::bind_method(D_METHOD("set_amp_mult", "amp_mult"), &SimpleOscillator::set_amp_mult);
-	ClassDB::bind_method(D_METHOD("get_amp_mult"), &SimpleOscillator::get_amp_mult);
+	ClassDB::bind_method(D_METHOD("set_mod", "mod"), &SimpleOscillator::set_mod);
+	ClassDB::bind_method(D_METHOD("get_mod"), &SimpleOscillator::get_mod);
 
 	ClassDB::bind_method(D_METHOD("set_amp_shift", "amp_shift"), &SimpleOscillator::set_amp_shift);
 	ClassDB::bind_method(D_METHOD("get_amp_shift"), &SimpleOscillator::get_amp_shift);
@@ -31,7 +31,7 @@ void SimpleOscillator::_bind_methods() {
 
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "amp_units"), "set_amp_units", "get_amp_units");
-	ADD_PROPERTY(PropertyInfo(Variant::REAL, "amp_mult"), "set_amp_mult", "get_amp_mult");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "mod"), "set_mod", "get_mod");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "amp_shift"), "set_amp_shift", "get_amp_shift");
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "phase_units"), "set_phase_units", "get_phase_units");
@@ -42,12 +42,12 @@ void SimpleOscillator::_bind_methods() {
 //Custom Functions
 float SimpleOscillator::get_val(float time)
 {
-	return amp_mult * sin((period * time) + phase_shift) + amp_shift;
+	return mod * sin((period * time) + phase_shift) + amp_shift;
 }
 
 float SimpleOscillator::get_val_unmodified(float time)
 {
-	return (amp_mult * sin(((period * time) + phase_shift) / period) + amp_shift) / amp_mult;
+	return (mod * sin(((period * time) + phase_shift) / period) + amp_shift) / mod;
 }
 
 void SimpleOscillator::warp_period(float current_time, float new_period)
